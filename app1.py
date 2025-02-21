@@ -1,42 +1,46 @@
 import streamlit as st
 import pickle
+import numpy as np
 
-pickle_in = open("Classifier.pkl","rb")
-classifier = pickle.load(pickle_in)
+st.write("✅ App Loaded")  # Debugging
 
-def predict_note_authentication(Overcharging_Ratio,Claim_Difference,Payment_ZScore):
+# Load Model
+try:
+    with open("Classifier.pkl", "rb") as pickle_in:
+        classifier = pickle.load(pickle_in)
+    st.write("✅ Model Loaded")  # Debugging
+except FileNotFoundError:
+    st.error("❌ Error: Model file 'Classifier.pkl' not found.")
+    st.stop()
+except Exception as e:
+    st.error(f"❌ Model loading failed: {e}")
+    st.stop()
 
-    Overcharging_Ratio = float(Overcharging_Ratio)
-    Claim_Difference = float(Claim_Difference)
-    Payment_ZScore = float(Payment_ZScore)
-
-    prediction=classifier.predict([[Overcharging_Ratio,Claim_Difference,Payment_ZScore]])
-    return prediction(0)
+def predict_fraud(Overcharging_Ratio, Claim_Difference, Payment_ZScore):
+    try:
+        input_data = np.array([[float(Overcharging_Ratio), float(Claim_Difference), float(Payment_ZScore)]])
+        prediction = classifier.predict(input_data)
+        return prediction[0]
+    except ValueError:
+        return "Invalid input"
 
 def main():
-    st.title("Fraud Detection in Medicare Claims")
+    st.title("🩺 Medicare Claims Fraud Detection")
+    st.markdown("### 🏦 Streamlit Bank Authenticator ML App")
 
-    html_temp = """
-    <div style="background-color:tomato;padding:10px">
-    <h2 style="color:white;text-align:center;">Streamlit Bank Authenticator ML App </h2>
-    </div>
-    """
+    st.write("✅ UI Loaded")  # Debugging
 
-    st.markdown(html_temp,unsafe_allow_html=True)
+    # User Input
+    Overcharging_Ratio = st.number_input("Overcharging Ratio", value=0.0, step=0.01)
+    Claim_Difference = st.number_input("Claim Difference", value=0.0, step=0.01)
+    Payment_ZScore = st.number_input("Payment Z-Score", value=0.0, step=0.01)
 
-    Overcharging_Ratio = st.text_input("Overcharging_Ratio","0.0")
-    Claim_Difference = st.text_input("Claim_Difference","0.0")
-    Payment_ZScore  = st.text_input("Payment_ZScore","0.0")
-    result=""
+    if st.button("🔍 Predict Fraud"):
+        result = predict_fraud(Overcharging_Ratio, Claim_Difference, Payment_ZScore)
+        if result == "Invalid input":
+            st.error("❌ Please enter valid numbers.")
+        else:
+            st.success(f"✅ Prediction: **{result}**")
 
-    if st.button("Predict"):
-       try:
-            result = predict_note_authentication(Overcharging_Ratio, Claim_Difference, Payment_ZScore)
-            st.success(f'The prediction result is: {result}')
-       except ValueError:
-            st.error("Please enter valid numeric values.")
-
-
-    if __name__=='__main__':
-        main()
-    
+if __name__ == '__main__':
+    main()
