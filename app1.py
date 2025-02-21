@@ -2,13 +2,11 @@ import streamlit as st
 import pickle
 import numpy as np
 
-st.write("✅ App Loaded")  # Debugging
 
 # Load Model
 try:
     with open("Classifier.pkl", "rb") as pickle_in:
         classifier = pickle.load(pickle_in)
-    st.write("✅ Model Loaded")  # Debugging
 except FileNotFoundError:
     st.error("❌ Error: Model file 'Classifier.pkl' not found.")
     st.stop()
@@ -26,9 +24,6 @@ def predict_fraud(Overcharging_Ratio, Claim_Difference, Payment_ZScore):
 
 def main():
     st.title("🩺 Medicare Claims Fraud Detection")
-    st.markdown("### 🏦 Streamlit Bank Authenticator ML App")
-
-    st.write("✅ UI Loaded")  # Debugging
 
     # User Input
     Overcharging_Ratio = st.number_input("Overcharging Ratio", value=0.0, step=0.01)
